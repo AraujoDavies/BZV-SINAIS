@@ -1,0 +1,6 @@
+__pycache__
+config.env
+*.session
+*.lock
+betfair-init/
+requeriments.txt

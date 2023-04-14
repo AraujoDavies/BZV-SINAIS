@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "bl-zebra2"
+version = "0.1.0"
+description = ""
+authors = ["Davies <daviesaraujo@hotmail.com>"]
+readme = "README.md"
+packages = [{include = "bl_zebra2"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.0.0"
+sqlalchemy = "^2.0.9"
+pymysql = "^1.0.3"
+cryptography = "^40.0.1"
+python-dotenv = "^1.0.0"
+schedule = "^1.1.0"
+bs4 = "^0.0.1"
+splinter = "^0.19.0"
+selenium = "^4.8.3"
+pyrogram = "^2.0.103"
+tgcrypto = "^1.2.5"
+requests = "^2.28.2"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.22.0"
+webdriver-manager = "^3.8.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
