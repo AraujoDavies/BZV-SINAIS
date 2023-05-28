@@ -4,7 +4,7 @@ from helper_sql import db_mysql
 from sqlalchemy import text
 from os import getenv
 from dotenv import load_dotenv
-from helper_telegram import enviar_no_telegram, chat_id, app, resultado_da_entrada
+from helper_telegram import enviar_no_telegram, chat_id_mandante, chat_id_visitante, app, resultado_da_entrada
 from api_betfair import api_betfair
 
 load_dotenv('config.env')
@@ -15,7 +15,7 @@ def enviar_entrada_no_telegram():
     """
     # Faça select na entradas q tenham 'evento_em_andamento' = 1 e 'id_telegram' = NULL
     logging.warning('3.1 - fazendo select para sinal no telegram...')
-    s_comando = "select market_id, mandante, visitante, tempo, odd from sinais where evento_em_andamento = '1' and id_telegram IS NULL;"
+    s_comando = "select market_id, mandante, visitante, tempo, odd, campeonato, mercadoSelecionado from sinais where evento_em_andamento = '1' and id_telegram IS NULL;"
     engine = db_mysql()
     with engine.begin() as c:
         sinais = c.execute(text(s_comando)).fetchall()
@@ -30,8 +30,23 @@ def enviar_entrada_no_telegram():
             visitante = str(sinal[2])
             tempo = str(sinal[3])
             odd = str(sinal[4])
+            campeonato = str(sinal[5])
+            mercado_selecionado = str(sinal[6])
 
-            msg = getenv('SINAL').replace('{mandante}', mandante).replace('{visitante}', visitante).replace('{tempo}', tempo).replace('{odd}', odd)
+            # Se mandante for a zebra
+            if mercado_selecionado == "0":
+                back_ao = mandante
+                chat_id = chat_id_mandante
+            # Se visitante for a zebra
+            elif mercado_selecionado == "1":
+                back_ao = visitante
+                chat_id = chat_id_visitante
+
+            msg = getenv('SINAL').replace(
+                '{mandante}', mandante).replace(
+                    '{visitante}', visitante).replace(
+                '{tempo}', tempo).replace('{odd}', odd).replace(
+                '{campeonato}', campeonato).replace("{back_ao}", back_ao)
 
             id_telegram = enviar_no_telegram(chat_id, msg)
 

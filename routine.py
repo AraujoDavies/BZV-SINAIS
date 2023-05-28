@@ -6,7 +6,7 @@ from helper_browser import meu_browser
 
 # passo a passo
 from step1 import acessa_betfair
-from step2 import dados_jogos_que_estao_ao_vivo, salvar_padrao
+from step2 import dados_jogos_que_estao_ao_vivo, salvar_padrao_zebra_mandante, salvar_padrao_zebra_visitante
 from step3 import enviar_entrada_no_telegram, att_resultado
 from dotenv import load_dotenv
 from time import sleep
@@ -14,7 +14,7 @@ from time import sleep
 load_dotenv('config.env')
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     encoding='utf-8',
     format='%(asctime)s - %(levelname)s: %(message)s',
 )
@@ -28,7 +28,8 @@ def run_rotina():
         for i in range(10):
             dados = dados_jogos_que_estao_ao_vivo(browser)
             if bool(dados):
-                salvar_padrao(dados)
+                salvar_padrao_zebra_mandante(dados)
+                salvar_padrao_zebra_visitante(dados)
             enviar_entrada_no_telegram()
         att_resultado()
         logging.warning('-------------finish------------')

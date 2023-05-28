@@ -15,7 +15,8 @@ from pyrogram import Client
 # api_hash = "f04ebf6d6c59aace23fba25ffa7c3891"
 # app = Client(getenv('TELEGRAM_CLIENT'), api_id=api_id, api_hash=api_hash)
 app = Client(getenv('TELEGRAM_CLIENT'))
-chat_id = getenv('TELEGRAM_CHAT_ID') # -1001849267600
+chat_id_mandante = getenv('TELEGRAM_CHAT_ID_MANDANTE') # -1001849267600
+chat_id_visitante = getenv('TELEGRAM_CHAT_ID_VISITANTE')
 
 def enviar_no_telegram(chat_id, msg):
     """
@@ -28,7 +29,7 @@ def enviar_no_telegram(chat_id, msg):
     return id
 
 # msg = 'dadada'
-# enviar_no_telegram(chat_id, msg)
+# enviar_no_telegram(chat_id_visitante, msg)
 
 async def resultado_da_entrada(chat_id, reply_msg_id, msg):
     """
@@ -44,6 +45,6 @@ async def resultado_da_entrada(chat_id, reply_msg_id, msg):
 @app.on_message() # quando receber uma mensagem...
 async def resposta(client, message): 
     print(message.chat.id, message.text) #Pessoa, oq a pessoa diz ao bot
-    await message.reply('me sorry yo no hablo tu language D:') # resposta do bot
+    # await message.reply('me sorry yo no hablo tu language D:') # resposta do bot
 
 # app.run() # executa

@@ -124,7 +124,7 @@ def dados_jogos_que_estao_ao_vivo(b):
     return dados_dos_jogos
 
 
-def salvar_padrao(dados):
+def salvar_padrao_zebra_mandante(dados):
     """
         2.2 - analisa dados dos jogos q estão rolando e salva padrão no DB. (Função principal)
     """
@@ -167,13 +167,12 @@ def salvar_padrao(dados):
 
     engine = db_mysql()
 
-    # padrao = padrao_odd & padrao_tempo & padrao_gap# padrão temporário...
     for linha in df[padrao].index:
         t = (df['market-id'][linha], df['data_raspagem'][linha], f"{df['tempo'][linha]}", df['mandante'][linha], df['visitante'][linha],
-    df['placar'][linha], f"{df['odd_back_mandante'][linha]}", df['competicao'][linha], f"{df['liquidez'][linha]}") 
+    df['placar'][linha], f"{df['odd_back_mandante'][linha]}", df['competicao'][linha], f"{df['liquidez'][linha]}", "0") 
         
         comando = f"""INSERT INTO sinais 
-(market_id, data_raspagem, tempo, mandante, visitante, placar, odd, campeonato, liquidez)
+(market_id, data_raspagem, tempo, mandante, visitante, placar, odd, campeonato, liquidez, mercadoSelecionado)
 VALUES
 {t};
         """
@@ -184,3 +183,63 @@ VALUES
         except SQLAlchemyError as ie:
             logging.critical(f"POSSIVELMENTE {df['market-id'][linha]} JÁ EXISTE NO BANCO... {ie}")
 
+
+
+def salvar_padrao_zebra_visitante(dados):
+    """
+        2.2 - analisa dados dos jogos q estão rolando e salva padrão no DB. (Função principal)
+    """
+    df= pd.DataFrame(dados)
+
+    logging.warning("2.2 - Convertendo valores...")
+    # convertendo valores
+    df['odd_lay_visitante'] = df['odd_lay_visitante'].astype(float)
+    df['odd_back_visitante'] = df['odd_back_visitante'].astype(float)
+    df['tempo'] = df['tempo'].astype(int)
+    df['liquidez'] = df['liquidez'].astype(int)
+
+    logging.warning("2.2 - Adicionando coluna GAP")
+    # criando colunas
+    df['gap'] = df['odd_lay_visitante'] - df['odd_back_visitante']
+
+    logging.warning(f"2.2 - Jogos em analise: {df.mandante.count()}")
+    # tempo de jogo entre 85 e 89
+    padrao_tempo = (df['tempo'] >= float(getenv("TEMPO_INICIAL"))) & (df['tempo'] < float(getenv("TEMPO_FINAL")))
+    logging.warning(f"2.2 - Jogos entre 85 e 90 min: {df[padrao_tempo].mandante.count()}")
+    # placar 2 - 1, 1 - 0
+    padrao_score = (df['placar'] == '0 - 1') | (df['placar'] == '1 - 2')
+    logging.warning(f"2.2 - Jogos com placar esperado: {df[padrao_score].mandante.count()}")
+    # ODD
+    padrao_odd = (df['odd_back_visitante'] > float(getenv("ODD_MIN"))) & (df['odd_back_visitante'] < float(getenv("ODD_MAX")))
+    logging.warning(f"2.2 - Jogos com padrão de ODD: {df[padrao_odd].mandante.count()}")
+    # liquidez > 40k
+    padrao_liq = (df['liquidez'] >= float(getenv("LIQUIDEZ")))
+    logging.warning(f"2.2 - Jogos com liquidez: {df[padrao_liq].mandante.count()}")
+    # mercado não suspenso
+    padrao_suspended = (df['mercado_suspenso'] == False) 
+    logging.warning(f"2.2 - Jogos Não suspensos: {df[padrao_suspended].mandante.count()}")
+    # gap aceitável
+    padrao_gap = (df['gap'] < float(getenv("GAP")))
+    logging.warning(f"2.2 - Jogos com gap ok: {df[padrao_gap].mandante.count()}")
+
+
+    padrao = padrao_suspended & padrao_liq & padrao_tempo & padrao_score & padrao_gap & padrao_odd
+    logging.warning(f"2.2 - Jogos com padrão: {df[padrao].mandante.count()}")
+
+    engine = db_mysql()
+
+    for linha in df[padrao].index:
+        t = (df['market-id'][linha], df['data_raspagem'][linha], f"{df['tempo'][linha]}", df['mandante'][linha], df['visitante'][linha],
+    df['placar'][linha], f"{df['odd_back_visitante'][linha]}", df['competicao'][linha], f"{df['liquidez'][linha]}", "1") 
+        
+        comando = f"""INSERT INTO sinais 
+(market_id, data_raspagem, tempo, mandante, visitante, placar, odd, campeonato, liquidez, mercadoSelecionado)
+VALUES
+{t};
+        """
+        logging.warning(f"2.2 - SQL: {comando}")
+        try:
+            with engine.begin() as c:
+                c.execute(text(comando))
+        except SQLAlchemyError as ie:
+            logging.critical(f"POSSIVELMENTE {df['market-id'][linha]} JÁ EXISTE NO BANCO... {ie}")
