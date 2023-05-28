@@ -11,11 +11,8 @@ load_dotenv('config.env')
 
 from pyrogram import Client
 
-# api_id = 13847847
-# api_hash = "f04ebf6d6c59aace23fba25ffa7c3891"
-# app = Client(getenv('TELEGRAM_CLIENT'), api_id=api_id, api_hash=api_hash)
 app = Client(getenv('TELEGRAM_CLIENT'))
-chat_id_mandante = getenv('TELEGRAM_CHAT_ID_MANDANTE') # -1001849267600
+chat_id_mandante = getenv('TELEGRAM_CHAT_ID_MANDANTE') 
 chat_id_visitante = getenv('TELEGRAM_CHAT_ID_VISITANTE')
 
 def enviar_no_telegram(chat_id, msg):
@@ -28,7 +25,6 @@ def enviar_no_telegram(chat_id, msg):
     app.stop()
     return id
 
-# msg = 'dadada'
 # enviar_no_telegram(chat_id_visitante, msg)
 
 async def resultado_da_entrada(chat_id, reply_msg_id, msg):
