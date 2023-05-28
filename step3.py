@@ -58,12 +58,12 @@ def enviar_entrada_no_telegram():
                 c.execute(text(u_comando))
 
 
-def att_resultado():
+def att_resultado(selecao):
     """
         3.2 - última tarefa... atualizar coluna resultado no DB, indicando se foi green ou red.
     """
     logging.warning('3.2 - fazendo select para API da BETFAIR...')
-    comando = "SELECT market_id, id_telegram FROM sinais WHERE evento_em_andamento = 1 AND id_telegram IS NOT NULL AND resultado IS NULL;"
+    comando = "SELECT market_id, id_telegram, mercadoSelecionado FROM sinais WHERE evento_em_andamento = 1 AND id_telegram IS NOT NULL AND resultado IS NULL;"
     engine = db_mysql()
     with engine.begin() as c:
         resultados_para_att = c.execute(text(comando)).fetchall()
@@ -73,16 +73,17 @@ def att_resultado():
         for result in resultados_para_att:
             market_id = result[0]
             reply_msg_id = result[1]
+            selecao = result[2]
 
             logging.warning('3.2 - buscando dados na API da betfair')
             mercado_na_api = api_betfair(market_id)
             status = mercado_na_api['result'][0]['status'] # OPEN / CLOSED
-            status_mandante = mercado_na_api['result'][0]['runners'][0]['status'] # WINNER / LOSER / ACTIVE
+            status_da_zebra = mercado_na_api['result'][0]['runners'][selecao]['status'] # WINNER / LOSER / ACTIVE
 
             # Se mercado está fechado(jogo acabou)
             if status == "CLOSED":
                 logging.warning('3.2 - Enviando resultado da entrada no telegram...')
-                if status_mandante == "WINNER":
+                if status_da_zebra == "WINNER":
                     msg = f'✅ GREEN ✅'
                     resultado_db = 'green'
                     app.run(
