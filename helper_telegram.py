@@ -12,8 +12,7 @@ load_dotenv('config.env')
 from pyrogram import Client
 
 app = Client(getenv('TELEGRAM_CLIENT'))
-chat_id_mandante = getenv('TELEGRAM_CHAT_ID_MANDANTE') 
-chat_id_visitante = getenv('TELEGRAM_CHAT_ID_VISITANTE')
+chat_id = getenv('TELEGRAM_CHAT_ID') 
 
 def enviar_no_telegram(chat_id, msg):
     """
@@ -25,7 +24,7 @@ def enviar_no_telegram(chat_id, msg):
     app.stop()
     return id
 
-# enviar_no_telegram(chat_id_visitante, msg)
+# enviar_no_telegram(chat_id, msg)
 
 async def resultado_da_entrada(chat_id, reply_msg_id, msg):
     """

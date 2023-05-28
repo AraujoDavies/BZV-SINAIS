@@ -4,7 +4,7 @@ from helper_sql import db_mysql
 from sqlalchemy import text
 from os import getenv
 from dotenv import load_dotenv
-from helper_telegram import enviar_no_telegram, chat_id_mandante, chat_id_visitante, app, resultado_da_entrada
+from helper_telegram import enviar_no_telegram, chat_id, app, resultado_da_entrada
 from api_betfair import api_betfair
 
 load_dotenv('config.env')
@@ -36,11 +36,10 @@ def enviar_entrada_no_telegram():
             # Se mandante for a zebra
             if mercado_selecionado == "0":
                 back_ao = mandante
-                chat_id = chat_id_mandante
+
             # Se visitante for a zebra
             elif mercado_selecionado == "1":
                 back_ao = visitante
-                chat_id = chat_id_visitante
 
             msg = getenv('SINAL').replace(
                 '{mandante}', mandante).replace(
