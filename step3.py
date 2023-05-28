@@ -58,7 +58,7 @@ def enviar_entrada_no_telegram():
                 c.execute(text(u_comando))
 
 
-def att_resultado(selecao):
+def att_resultado():
     """
         3.2 - última tarefa... atualizar coluna resultado no DB, indicando se foi green ou red.
     """
