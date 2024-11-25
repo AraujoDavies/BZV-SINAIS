@@ -22,7 +22,14 @@ def session_token():
     print ("Request failed.")
 
 
-def callAping(jsonrpc_req):
+def callAping(jsonrpc_req: str) -> dict:
+    """
+      Bate na API da betfair para coletar dados
+
+      jsonrpc_req (_str_) -> filtro (SEE MORE: https://docs.developer.betfair.com/display/1smk3cen4v3lu3yomq5qye0ni/Getting+Started#GettingStarted-ExampleRequests)
+
+      return game_data
+    """
     url = "https://api.betfair.com/exchange/betting/json-rpc/v1"
     headers = {'X-Application': getenv('APP_KEY'), 'X-Authentication': session_token(), 'content-type': 'application/json'}
     try:

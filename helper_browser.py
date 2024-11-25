@@ -15,4 +15,4 @@ chrome_options.add_argument("--force-device-scale-factor=0.9")
 def meu_browser():
     return Browser(driver_name='remote',browser='Chrome', command_executor='http://localhost:4444', options=chrome_options)
     # driver local
-    # return Browser('chrome', options=chrome_options, service=service)
+    # return Browser('chrome', options=chrome_options) #, service=service)

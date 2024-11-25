@@ -1,4 +1,4 @@
-FROM python
+FROM python:3.11.10
 
 WORKDIR /blzebra
 
@@ -8,4 +8,5 @@ RUN pip install -r requeriments.txt
 
 ENV TZ=America/Sao_Paulo
 
-CMD [ "python", "routine.py" ]
+CMD [ "python", "entradas.py" ]
+# CMD [ "python", "routine.py" ]

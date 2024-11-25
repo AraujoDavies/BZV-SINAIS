@@ -61,14 +61,37 @@ def propor_entrada_a125(b, market_id, mercado_selecionado, valor_apostado):
     """
     url = "https://www.betfair.com/exchange/plus/football/market/" + market_id
     b.visit(url)
-    banca = meu_saldo(b)
+    x = 0
+    while True:
+        x += 1 # a cada 3s recarrega
+        logging.warning('URL Atual: %s', b.url)
+        if market_id in b.url:
+            break
+        sleep(1)
+        if x % 5 == 0: b.visit(url)
 
-    carregou_site = b.is_element_present_by_xpath('//td[contains(@class, "last-back-cell")]', wait_time=25)
+    carregou_site = b.is_element_present_by_xpath('//td[contains(@class, "last-back-cell")]', wait_time=90)
     if bool(carregou_site) == False:
+        logging.error('Falha ao carregar site...')
+        with engine.begin() as c:
+            c.execute(text(f"UPDATE sinais SET entradaProposta = 'S' WHERE market_id = '{market_id}';"))
         return False
     sleep(1)
 
+    banca = meu_saldo(b)
+    logging.warning('Valor da banca: %s', banca)
+
     # click na odd do mercado da zebra
+    try:
+        odd_back = b.find_by_xpath('//td[contains(@class, "last-back-cell")]')[mercado_selecionado].text.split('\n')[0]
+        odd_back = float(odd_back)
+    except:
+        odd_back = 50
+
+    if odd_back > 1.5:
+        logging.error('ODD Back MUITO maior que o esperado: %s', odd_back)
+        return False
+    
     b.find_by_xpath('//td[contains(@class, "last-back-cell")]')[mercado_selecionado].click()
     # propoe a odd de 1.25
     b.find_by_xpath('//div[@class="betslip-price-ladder"]//input').fill('1.25')
@@ -178,13 +201,14 @@ Resultado: {pl} ❌❌
         return id_telegram
     except:
         return 'ERRO ao enviar resultado no telegram'
-# market_id = '1.236085173'
-# mercado_selecionado = 1
-# valor_apostado = 5
-
-        
+       
 engine = db_mysql()
 logging.warning('ON...')
+# market_id = '1.236092576'
+# mercado_selecionado = 0
+# valor_apostado = 5
+# import sys
+# sys.exit()
 
 while True:
     with engine.begin() as c:
