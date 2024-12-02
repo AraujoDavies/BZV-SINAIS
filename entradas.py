@@ -6,7 +6,7 @@ from helper_browser import meu_browser
 from helper_sql import db_mysql
 from step1 import acessa_betfair
 from dotenv import load_dotenv
-from helper_telegram import enviar_no_telegram, chat_id
+from helper_telegram import enviar_no_telegram
 
 load_dotenv('config.env')
 
@@ -16,6 +16,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s: %(message)s',
 )
 
+CHAT_ID = '-1002294019228'
 
 def meu_saldo(b) -> float | str:
     """
@@ -151,7 +152,7 @@ def atualizar_stake_control(market_id):
             pl = (banca_ini - banca_now) * -1
 
             with engine.begin() as c:
-                c.execute(text(f"UPDATE entradas SET pl = {pl} WHERE market_id = {market_id};"))
+                c.execute(text(f"UPDATE entradas SET pl = {pl}, banca_final = {banca_now} WHERE market_id = {market_id};"))
                 stake_info = c.execute(text("SELECT stake_base, stake_atual FROM stake_control WHERE id = 1;")).fetchall()
                 stake_base = stake_info[0][0]
                 stake_atual = stake_info[0][1]
@@ -161,12 +162,31 @@ def atualizar_stake_control(market_id):
                 if pl > 0 and nova_stake_atual < stake_base * 2: # atualizar stake
                     c.execute(text(f"UPDATE stake_control SET stake_atual = {nova_stake_atual}, banca = {banca_now}, update_datetime = NOW() WHERE id = 1;"))
                 else: # stake atual reseta
-                    c.execute(text(f"UPDATE stake_control SET stake_atual = {stake_base}, update_datetime = NOW() WHERE id = 1;"))
+                    c.execute(text(f"UPDATE stake_control SET stake_atual = {stake_base}, banca = {banca_now}, update_datetime = NOW() WHERE id = 1;"))
     
         return True
     except:
         return False
 
+
+def enviar_entrada_em_andamento(market_id):
+    try:
+        with engine.begin() as c:
+            dados_msg = c.execute(text(f"select partida from entradas where market_id = '{market_id}';")).fetchall()
+
+        partida = dados_msg[0][0]
+
+        msg = f"""
+❗️❗️🦓 ENTRADA EM ANDAMENTO
+❗️❗️🦓 {partida}
+"""
+
+        id_telegram = enviar_no_telegram(CHAT_ID, msg)
+
+        return id_telegram
+    except:
+        return 'ERRO ao enviar resultado no telegram'
+ 
 
 def enviar_resultado_telegram(market_id):
     try:
@@ -179,24 +199,20 @@ def enviar_resultado_telegram(market_id):
 
         if pl > 0:
             msg = f"""
-    ❗️❗️🦓 BZV Entrada realizada 🦓❗️❗️
-
-{partida}
+❗️❗️🦓 {partida} 🦓❗️❗️
 
 Stake: {stake} 💰
-Resultado: {pl} ✅✅
-    """
+Resultado: {pl} ✅
+"""
         else:
             msg = f"""
-    ❗️❗️🦓 BZV Entrada realizada 🦓❗️❗️
-
-{partida}
+❗️❗️🦓 {partida} 🦓❗️❗️
 
 Stake: {stake} 💰
-Resultado: {pl} ❌❌
-    """
-            
-        id_telegram = enviar_no_telegram(chat_id, msg)
+Resultado: {pl} ❌
+"""
+
+        id_telegram = enviar_no_telegram(CHAT_ID, msg)
 
         return id_telegram
     except:
@@ -210,9 +226,28 @@ logging.warning('ON...')
 # import sys
 # sys.exit()
 
+SQL_CONSULTA_SINAL = """
+SELECT market_id, mercadoSelecionado FROM sinais WHERE entradaProposta = 'N' AND resultado IS NULL AND campeonato IN (SELECT campeonato FROM (SELECT 
+    campeonato,
+    SUM(CASE WHEN resultado = 'green' THEN 1 ELSE 0 END) AS qt_green,
+    SUM(CASE WHEN resultado = 'red' THEN 1 ELSE 0 END) AS qt_red,
+    IFNULL(SUM(CASE WHEN resultado = 'green' THEN 1 ELSE 0 END) /
+    NULLIF(SUM(CASE WHEN resultado = 'red' THEN 1 ELSE 0 END), 0), SUM(CASE WHEN resultado = 'green' THEN 1 ELSE 0 END)) AS acima_quatro_e_lucrativo
+FROM 
+    sinais
+GROUP BY 
+    campeonato
+HAVING 
+    acima_quatro_e_lucrativo >= 4
+    ) campeonatos_lucrativos
+) ORDER BY data_raspagem DESC LIMIT 1;
+"""
+
+# id_telegram = enviar_no_telegram(CHAT_ID, 'ON ON ON')
+
 while True:
     with engine.begin() as c:
-        market = c.execute(text("SELECT market_id, mercadoSelecionado FROM sinais WHERE entradaProposta = 'N' AND resultado IS NULL ORDER BY data_raspagem DESC LIMIT 1;")).fetchall()
+        market = c.execute(text(SQL_CONSULTA_SINAL)).fetchall()
         if bool(market):
             stake = c.execute(text("SELECT stake_atual FROM stake_control WHERE id = 1;")).fetchall()
 
@@ -233,6 +268,8 @@ while True:
                 b.quit()
             except: 
                 pass
+
+            enviar_entrada_em_andamento(market_id)
 
             while True:
                 atualizou = atualizar_stake_control(market_id)
