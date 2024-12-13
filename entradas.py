@@ -7,6 +7,8 @@ from helper_sql import db_mysql
 from step1 import acessa_betfair
 from dotenv import load_dotenv
 from helper_telegram import enviar_no_telegram
+from sync_db import gsheet_sync
+import pandas as pd
 
 load_dotenv('config.env')
 
@@ -243,7 +245,29 @@ HAVING
 ) ORDER BY data_raspagem DESC LIMIT 1;
 """
 
-# id_telegram = enviar_no_telegram(CHAT_ID, 'ON ON ON')
+
+def atualizando_gsheet():
+    logging.warning('atualizando entradas')
+
+    # id_telegram = enviar_no_telegram(CHAT_ID, 'ON ON ON')
+    with engine.begin() as c:
+        todas_entradas = c.execute(text('SELECT * FROM entradas;')).fetchall()
+
+    df = pd.DataFrame(todas_entradas, dtype='str')
+
+    # converter em float
+    for column in ['banca', 'stake', 'pl', 'banca_final']:
+        df[column] = df[column].map(lambda x: float(x))
+
+    # ajuste data
+    df['data'] = df['data'].map(lambda x: x.split()[0])
+    status_sync = gsheet_sync(df)
+
+    logging.warning('status sync: %s', status_sync)
+
+
+atualizando_gsheet()
+
 
 while True:
     with engine.begin() as c:
@@ -277,6 +301,7 @@ while True:
                     logging.warning('Atualizou stake control')
                     status_envio = enviar_resultado_telegram(market_id)
                     logging.warning('Enviou no telegram: %s', status_envio)
+                    atualizando_gsheet()
                     break
         else:
             try: # fecha o browser

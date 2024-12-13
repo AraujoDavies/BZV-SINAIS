@@ -3,3 +3,4 @@ config.env
 *.session
 *.lock
 betfair-init/
+*.json
