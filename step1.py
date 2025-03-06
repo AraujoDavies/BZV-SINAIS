@@ -30,6 +30,7 @@ def acessa_betfair(b):
         b.find_by_xpath('//input[@name="password"]').fill(pass_betfair)
         b.find_by_xpath('//input[@value="Login"]').click()
         logging.warning("1 - login feito com sucesso!")
-    except:
-        b.screenshot(getenv("PRINT_DIR"))
+    except Exception as error:
+        # b.screenshot(getenv("PRINT_DIR"))
         logging.error("1 - ERRO ao acessar betfair!")
+        # logging.error(error)

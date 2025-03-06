@@ -3,6 +3,7 @@
 
 import schedule, logging, datetime
 from helper_browser import meu_browser
+from selenium.common.exceptions import InvalidSessionIdException
 
 # passo a passo
 from step1 import acessa_betfair
@@ -19,10 +20,10 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s: %(message)s',
 )
 
-def run_rotina():
+
+def run_rotina(browser):
     try:
         logging.warning('-------------start------------')
-        browser = meu_browser()
         acessa_betfair(browser)
         browser.is_element_present_by_xpath('//table[@class="coupon-table"]', wait_time=10)
         for i in range(10):
@@ -36,12 +37,17 @@ def run_rotina():
     except:
         logging.critical('ROTINA FALHOU')
         sleep(60)
-    finally:
-        browser.quit()
+    # finally:
+    #     browser.quit()
 
-
-run_rotina()
-schedule.every(10).seconds.do(run_rotina)
+sleep(90)
+browser = meu_browser()
 
 while True:
-    schedule.run_pending()
+    try:
+        print(browser.title)
+    except InvalidSessionIdException:
+        browser = meu_browser()
+
+    run_rotina(browser)
+    sleep(3)

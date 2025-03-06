@@ -1,12 +1,14 @@
-FROM python:3.11.10
+# FROM python:3.11.10
 
-WORKDIR /blzebra
+# WORKDIR /blzebra
 
-COPY . .
+# COPY . .
 
-RUN pip install -r requeriments.txt
+# RUN pip install -r requeriments.txt
 
-ENV TZ=America/Sao_Paulo
+# ENV TZ=America/Sao_Paulo
 
-CMD [ "python", "entradas.py" ]
-# CMD [ "python", "routine.py" ]
+# CMD [ "python", "entradas.py" ]
+# # CMD [ "python", "routine.py" ]
+
+# exige localização ai nao da pra usar o container

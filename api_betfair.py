@@ -12,7 +12,7 @@ load_dotenv('config.env')
 def session_token():
   payload = f"username={getenv('USER_BETFAIR')}&password={getenv('PASS_BETFAIR')}"
   headers = {'X-Application': getenv('APP_KEY'), 'Content-Type': 'application/x-www-form-urlencoded'}
-  resp = requests.post('https://identitysso-cert.betfair.com/api/certlogin', data=payload, cert=(getenv('CRT_DIR'), getenv('KEY_DIR')), headers=headers)
+  resp = requests.post('https://identitysso-cert.betfair.bet.br/api/certlogin', data=payload, cert=(getenv('CRT_DIR'), getenv('KEY_DIR')), headers=headers)
   
   if resp.status_code == 200:
     resp_json = resp.json()
@@ -30,7 +30,7 @@ def callAping(jsonrpc_req: str) -> dict:
 
       return game_data
     """
-    url = "https://api.betfair.com/exchange/betting/json-rpc/v1"
+    url = "https://api.betfair.bet.br/exchange/betting/json-rpc/v1"
     headers = {'X-Application': getenv('APP_KEY'), 'X-Authentication': session_token(), 'content-type': 'application/json'}
     try:
         req = urllib.request.Request(url, jsonrpc_req.encode('utf-8'), headers)
