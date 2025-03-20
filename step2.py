@@ -53,10 +53,10 @@ def dados_jogos_que_estao_ao_vivo(b):
                 # Pegando ID do mercado, ignorando os q já estão no banco
                 market_id_raspado = jogo.td.find('a', 'mod-link').get('data-market-id')
                 if market_id_raspado in market_ids:
-                    logging.warning(f'2.1 - pulando o ID {market_id_raspado} já existe no DB!')
+                    logging.info(f'2.1 - pulando o ID {market_id_raspado} já existe no DB!')
                     ignore_evento = True
                 else:
-                    logging.warning(f'2.1 - ID {market_id_raspado} não existe no DB. incluso no dict!')
+                    logging.info(f'2.1 - ID {market_id_raspado} não existe no DB. incluso no dict!')
                         
                 if ignore_evento:
                     continue
@@ -120,7 +120,7 @@ def dados_jogos_que_estao_ao_vivo(b):
                 # salvando na lista
                 dados_dos_jogos.append(dict)
     
-    logging.warning(f"2.1 - jogos coletados para analise {len(dados_dos_jogos)}")
+    logging.info(f"2.1 - jogos coletados para analise {len(dados_dos_jogos)}")
     return dados_dos_jogos
 
 
@@ -130,40 +130,40 @@ def salvar_padrao_zebra_mandante(dados):
     """
     df= pd.DataFrame(dados)
 
-    logging.warning("2.2 ZebraMandante - Convertendo valores...")
+    logging.info("2.2 ZebraMandante - Convertendo valores...")
     # convertendo valores
     df['odd_lay_mandante'] = df['odd_lay_mandante'].astype(float)
     df['odd_back_mandante'] = df['odd_back_mandante'].astype(float)
     df['tempo'] = df['tempo'].astype(int)
     df['liquidez'] = df['liquidez'].astype(int)
 
-    logging.warning("2.2 ZebraMandante - Adicionando coluna GAP")
+    logging.info("2.2 ZebraMandante - Adicionando coluna GAP")
     # criando colunas
     df['gap'] = df['odd_lay_mandante'] - df['odd_back_mandante']
 
-    logging.warning(f"2.2 ZebraMandante - Jogos em analise: {df.mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos em analise: {df.mandante.count()}")
     # tempo de jogo entre 85 e 89
     padrao_tempo = (df['tempo'] >= float(getenv("TEMPO_INICIAL"))) & (df['tempo'] < float(getenv("TEMPO_FINAL")))
-    logging.warning(f"2.2 ZebraMandante - Jogos entre 85 e 90 min: {df[padrao_tempo].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos entre 85 e 90 min: {df[padrao_tempo].mandante.count()}")
     # placar 2 - 1, 1 - 0
     padrao_score = (df['placar'] == '1 - 0') | (df['placar'] == '2 - 1')
-    logging.warning(f"2.2 ZebraMandante - Jogos com placar esperado: {df[padrao_score].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos com placar esperado: {df[padrao_score].mandante.count()}")
     # ODD
     padrao_odd = (df['odd_back_mandante'] > float(getenv("ODD_MIN"))) & (df['odd_back_mandante'] < float(getenv("ODD_MAX")))
-    logging.warning(f"2.2 ZebraMandante - Jogos com padrão de ODD: {df[padrao_odd].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos com padrão de ODD: {df[padrao_odd].mandante.count()}")
     # liquidez > 40k
     padrao_liq = (df['liquidez'] >= float(getenv("LIQUIDEZ")))
-    logging.warning(f"2.2 ZebraMandante - Jogos com liquidez: {df[padrao_liq].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos com liquidez: {df[padrao_liq].mandante.count()}")
     # mercado não suspenso
     padrao_suspended = (df['mercado_suspenso'] == False) 
-    logging.warning(f"2.2 ZebraMandante - Jogos Não suspensos: {df[padrao_suspended].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos Não suspensos: {df[padrao_suspended].mandante.count()}")
     # gap aceitável
     padrao_gap = (df['gap'] < float(getenv("GAP")))
-    logging.warning(f"2.2 ZebraMandante - Jogos com gap ok: {df[padrao_gap].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos com gap ok: {df[padrao_gap].mandante.count()}")
 
 
     padrao = padrao_suspended & padrao_liq & padrao_tempo & padrao_score & padrao_gap & padrao_odd
-    logging.warning(f"2.2 ZebraMandante - Jogos com padrão: {df[padrao].mandante.count()}")
+    logging.info(f"2.2 ZebraMandante - Jogos com padrão: {df[padrao].mandante.count()}")
 
     engine = db_mysql()
 
@@ -176,7 +176,7 @@ def salvar_padrao_zebra_mandante(dados):
 VALUES
 {t};
         """
-        logging.warning(f"2.2 ZebraMandante - SQL: {comando}")
+        logging.info(f"2.2 ZebraMandante - SQL: {comando}")
         try:
             with engine.begin() as c:
                 c.execute(text(comando))
@@ -191,40 +191,40 @@ def salvar_padrao_zebra_visitante(dados):
     """
     df= pd.DataFrame(dados)
 
-    logging.warning("2.2 ZebraVisitante - Convertendo valores...")
+    logging.info("2.2 ZebraVisitante - Convertendo valores...")
     # convertendo valores
     df['odd_lay_visitante'] = df['odd_lay_visitante'].astype(float)
     df['odd_back_visitante'] = df['odd_back_visitante'].astype(float)
     df['tempo'] = df['tempo'].astype(int)
     df['liquidez'] = df['liquidez'].astype(int)
 
-    logging.warning("2.2 ZebraVisitante - Adicionando coluna GAP")
+    logging.info("2.2 ZebraVisitante - Adicionando coluna GAP")
     # criando colunas
     df['gap'] = df['odd_lay_visitante'] - df['odd_back_visitante']
 
-    logging.warning(f"2.2 ZebraVisitante - Jogos em analise: {df.mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos em analise: {df.mandante.count()}")
     # tempo de jogo entre 85 e 89
     padrao_tempo = (df['tempo'] >= float(getenv("TEMPO_INICIAL"))) & (df['tempo'] < float(getenv("TEMPO_FINAL")))
-    logging.warning(f"2.2 ZebraVisitante - Jogos entre 85 e 90 min: {df[padrao_tempo].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos entre 85 e 90 min: {df[padrao_tempo].mandante.count()}")
     # placar 2 - 1, 1 - 0
     padrao_score = (df['placar'] == '0 - 1') | (df['placar'] == '1 - 2')
-    logging.warning(f"2.2 ZebraVisitante - Jogos com placar esperado: {df[padrao_score].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos com placar esperado: {df[padrao_score].mandante.count()}")
     # ODD
     padrao_odd = (df['odd_back_visitante'] > float(getenv("ODD_MIN"))) & (df['odd_back_visitante'] < float(getenv("ODD_MAX")))
-    logging.warning(f"2.2 ZebraVisitante - Jogos com padrão de ODD: {df[padrao_odd].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos com padrão de ODD: {df[padrao_odd].mandante.count()}")
     # liquidez > 40k
     padrao_liq = (df['liquidez'] >= float(getenv("LIQUIDEZ")))
-    logging.warning(f"2.2 ZebraVisitante - Jogos com liquidez: {df[padrao_liq].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos com liquidez: {df[padrao_liq].mandante.count()}")
     # mercado não suspenso
     padrao_suspended = (df['mercado_suspenso'] == False) 
-    logging.warning(f"2.2 ZebraVisitante - Jogos Não suspensos: {df[padrao_suspended].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos Não suspensos: {df[padrao_suspended].mandante.count()}")
     # gap aceitável
     padrao_gap = (df['gap'] < float(getenv("GAP")))
-    logging.warning(f"2.2 ZebraVisitante - Jogos com gap ok: {df[padrao_gap].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos com gap ok: {df[padrao_gap].mandante.count()}")
 
 
     padrao = padrao_suspended & padrao_liq & padrao_tempo & padrao_score & padrao_gap & padrao_odd
-    logging.warning(f"2.2 ZebraVisitante - Jogos com padrão: {df[padrao].mandante.count()}")
+    logging.info(f"2.2 ZebraVisitante - Jogos com padrão: {df[padrao].mandante.count()}")
 
     engine = db_mysql()
 
@@ -237,7 +237,7 @@ def salvar_padrao_zebra_visitante(dados):
 VALUES
 {t};
         """
-        logging.warning(f"2.2 ZebraVisitante - SQL: {comando}")
+        logging.info(f"2.2 ZebraVisitante - SQL: {comando}")
         try:
             with engine.begin() as c:
                 c.execute(text(comando))

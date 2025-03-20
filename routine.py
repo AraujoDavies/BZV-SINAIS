@@ -14,7 +14,12 @@ from time import sleep
 
 load_dotenv('config.env')
 
+log_name = './logs/sinais'
+log_name += datetime.datetime.now().strftime('%d%m')
+log_name += '.log'
+
 logging.basicConfig(
+    filename=log_name,
     level=logging.WARNING,
     encoding='utf-8',
     format='%(asctime)s - %(levelname)s: %(message)s',
@@ -23,9 +28,18 @@ logging.basicConfig(
 
 def run_rotina(browser):
     try:
-        logging.warning('-------------start------------')
-        acessa_betfair(browser)
-        browser.is_element_present_by_xpath('//table[@class="coupon-table"]', wait_time=10)
+        # logging.warning('-------------start------------')
+        
+        timeout = 0
+        logou = acessa_betfair(browser)
+        while logou == False:
+            logou = acessa_betfair(browser)
+            timeout += 1
+            if timeout > 3:
+                logging.critical('Várias tentativas de login falharam')
+                break
+
+        browser.is_element_present_by_xpath('//table[@class="coupon-table"]', wait_time=20)
         for i in range(10):
             dados = dados_jogos_que_estao_ao_vivo(browser)
             if bool(dados):
@@ -33,20 +47,22 @@ def run_rotina(browser):
                 salvar_padrao_zebra_visitante(dados)
             enviar_entrada_no_telegram()
         att_resultado()
-        logging.warning('-------------finish------------')
-    except:
-        logging.critical('ROTINA FALHOU')
-        sleep(60)
+        # logging.warning('-------------finish------------')
+    except InvalidSessionIdException:
+        logging.error('Fechou o navegador em execução')
+    except Exception as error:
+        logging.critical('ROTINA FALHOU: %s', str(error))
+        sleep(10)
     # finally:
     #     browser.quit()
 
-sleep(90)
-browser = meu_browser()
+# sleep(90)
 
 while True:
     try:
         print(browser.title)
-    except InvalidSessionIdException:
+    except:
+        logging.warning('Abrinco chrome!')
         browser = meu_browser()
 
     run_rotina(browser)

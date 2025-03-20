@@ -15,9 +15,10 @@ def db_mysql():
     engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{database}')
     return engine
 
-# engine = db_mysql()
-# from sqlalchemy import text
-# with engine.begin() as c:
-#     a = c.execute(text("select * from sinais")).fetchall()
+if __name__ == '__main__':
+    engine = db_mysql()
+    from sqlalchemy import text
+    with engine.begin() as c:
+        a = c.execute(text("select * from sinais")).fetchall()
 
 # print(a)

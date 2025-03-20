@@ -14,7 +14,7 @@ def enviar_entrada_no_telegram():
         3.1 - Enviar sinal no telegram
     """
     # Faça select na entradas q tenham 'evento_em_andamento' = 1 e 'id_telegram' = NULL
-    logging.warning('3.1 - fazendo select para sinal no telegram...')
+    logging.info('3.1 - fazendo select para sinal no telegram...')
     s_comando = "select market_id, mandante, visitante, tempo, odd, campeonato, mercadoSelecionado from sinais where evento_em_andamento = '1' and id_telegram IS NULL;"
     engine = db_mysql()
     with engine.begin() as c:
@@ -23,7 +23,7 @@ def enviar_entrada_no_telegram():
     # Enviando sinais
     if bool(sinais):
         for sinal in sinais:
-            logging.warning('3.1 - Enviando sinal no telegram...')
+            logging.info('3.1 - Enviando sinal no telegram...')
             
             market_id = str(sinal[0])
             mandante = str(sinal[1])
@@ -62,7 +62,7 @@ def att_resultado():
     """
         3.2 - última tarefa... atualizar coluna resultado no DB, indicando se foi green ou red.
     """
-    logging.warning('3.2 - fazendo select para API da BETFAIR...')
+    logging.info('3.2 - fazendo select para API da BETFAIR...')
     comando = "SELECT market_id, id_telegram, mercadoSelecionado FROM sinais WHERE evento_em_andamento = 1 AND id_telegram IS NOT NULL AND resultado IS NULL;"
     engine = db_mysql()
     with engine.begin() as c:

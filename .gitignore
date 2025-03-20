@@ -5,3 +5,6 @@ config.env
 betfair-init/
 *.json
 logs/
+geo.*
+dist/
+build/
