@@ -1,0 +1,78 @@
+services:
+  sinais: 
+    container_name: bzv-sinais
+    image: base-bzv-betfair:latest
+    restart: always
+    volumes:
+      - ./:/home/
+    environment:
+      - TZ=America/Sao_Paulo
+      - URL_BETFAIR=https://www.betfair.com/exchange/plus/pt/futebol-apostas-1/inplay
+      - USER_BETFAIR=${USER_BETFAIR}
+      - PASS_BETFAIR=${PASS_BETFAIR}
+
+      - HOST_DATABASE=127.0.0.1:3306
+      - USER_DATABASE=root
+      - PASSWORD_DATABASE=admin
+      - USE_DATABASE=projeto_back_zebra
+
+      # test-bots = '-1001849267600' | chat_bzv = '-1001710630162' 
+      - TELEGRAM_CLIENT=${TELEGRAM_CLIENT}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+
+      # Diretório do certificado .crt e da chave .key
+      - CRT_DIR=/home/betfair-init/client-2048.crt
+      - KEY_DIR=/home/betfair-init/client-2048.key
+      - APP_KEY=${APP_KEY}
+
+      - LIQUIDEZ=40000
+      - ODD_MIN=1.25
+      - ODD_MAX=1.35
+      - GAP=0.05
+      - TEMPO_INICIAL=85
+      - TEMPO_FINAL=90
+
+      - SINAL=${SINAL}
+
+    command: bash -c "cd home/ && python routine.py"
+    network_mode: host
+
+
+  entradas: 
+    container_name: bzv-entradas
+    image: base-bzv-betfair:latest
+    depends_on: [sinais]
+    restart: always
+    volumes:
+      - ./:/home/
+    environment:
+      - TZ=America/Sao_Paulo
+      - URL_BETFAIR=https://www.betfair.com/exchange/plus/pt/futebol-apostas-1/inplay
+      - USER_BETFAIR=${USER_BETFAIR}
+      - PASS_BETFAIR=${PASS_BETFAIR}
+
+      - HOST_DATABASE=127.0.0.1:3306
+      - USER_DATABASE=root
+      - PASSWORD_DATABASE=admin
+      - USE_DATABASE=projeto_back_zebra
+
+      # test-bots = '-1001849267600' | chat_bzv = '-1001710630162' 
+      - TELEGRAM_CLIENT=${TELEGRAM_CLIENT}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+
+      # Diretório do certificado .crt e da chave .key
+      - CRT_DIR=/home/betfair-init/client-2048.crt
+      - KEY_DIR=/home/betfair-init/client-2048.key
+      - APP_KEY=${APP_KEY}
+
+      - LIQUIDEZ=40000
+      - ODD_MIN=1.25
+      - ODD_MAX=1.35
+      - GAP=0.05
+      - TEMPO_INICIAL=85
+      - TEMPO_FINAL=90
+
+      - SINAL=${SINAL}
+
+    command: bash -c "cd home/ && python entradas.py"
+    network_mode: host

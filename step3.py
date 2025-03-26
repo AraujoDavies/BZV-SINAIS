@@ -7,7 +7,13 @@ from dotenv import load_dotenv
 from helper_telegram import enviar_no_telegram, chat_id, app, resultado_da_entrada
 from api_betfair import api_betfair
 
-load_dotenv('config.env')
+load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    encoding='utf-8',
+    format='%(asctime)s - %(levelname)s: %(message)s',
+)
 
 def enviar_entrada_no_telegram():
     """

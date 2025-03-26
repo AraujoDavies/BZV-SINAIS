@@ -7,7 +7,7 @@ from pyrogram import Client
 
 import logging
 
-load_dotenv('config.env')
+load_dotenv()
 
 from pyrogram import Client
 

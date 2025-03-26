@@ -1,2 +1,0 @@
-Set WshShell = CreateObject("WScript.Shell")
-WshShell.Run "F:\SOdatafiles\Dev\python\back-zebra-sinais\start_sinais.bat", 0

@@ -10,7 +10,13 @@ from time import sleep
 from os import getenv
 from dotenv import load_dotenv
 
-load_dotenv('config.env')
+load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    encoding='utf-8',
+    format='%(asctime)s - %(levelname)s: %(message)s',
+)
 
 def dados_jogos_que_estao_ao_vivo(b):
     """

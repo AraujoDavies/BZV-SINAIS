@@ -2,7 +2,7 @@ from pyrogram import Client
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv('config.env')
+load_dotenv()
 
 with Client(getenv('TELEGRAM_CLIENT')) as app:
     all_chats = app.get_dialogs()

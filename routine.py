@@ -1,7 +1,7 @@
 # O objetivo desta rotina é entrar na betfair, analisar os dados, 
 # add no DB, enviar sinal no telegram e por fim salvar o resultado da entrada
 
-import schedule, logging, datetime
+import schedule, logging, datetime, os
 from helper_browser import meu_browser
 from selenium.common.exceptions import InvalidSessionIdException
 
@@ -12,19 +12,26 @@ from step3 import enviar_entrada_no_telegram, att_resultado
 from dotenv import load_dotenv
 from time import sleep
 
-load_dotenv('config.env')
+load_dotenv()
 
-log_name = './logs/sinais'
-log_name += datetime.datetime.now().strftime('%d%m')
-log_name += '.log'
-
-logging.basicConfig(
-    filename=log_name,
-    level=logging.WARNING,
-    encoding='utf-8',
-    format='%(asctime)s - %(levelname)s: %(message)s',
-)
-
+if os.name == 'nt': # "nt" é windows | "posix" é linux/mac
+    log_name = './logs/sinais'
+    log_name += datetime.datetime.now().strftime('%d%m')
+    log_name += '.log'
+    logging.warning("Você está no Windows - Logs salvos!")
+    logging.basicConfig(
+        filename=log_name,
+        level=logging.INFO,
+        encoding='utf-8',
+        format='%(asctime)s - %(levelname)s: %(message)s',
+    )
+else:
+    logging.warning('Não está salvando logs')
+    logging.basicConfig(
+        level=logging.INFO,
+        encoding='utf-8',
+        format='%(asctime)s - %(levelname)s: %(message)s',
+    )
 
 def run_rotina(browser):
     try:
@@ -62,8 +69,8 @@ while True:
     try:
         print(browser.title)
     except:
-        logging.warning('Abrinco chrome!')
-        browser = meu_browser()
+        logging.warning('Abrindo chrome!')
+        browser = meu_browser(enable_vnc=False)
 
     run_rotina(browser)
     sleep(3)

@@ -3,7 +3,7 @@ import urllib.parse
 from os import getenv
 from dotenv import load_dotenv
 
-load_dotenv('config.env')
+load_dotenv()
 
 def db_mysql():
     host= getenv('HOST_DATABASE')

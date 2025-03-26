@@ -4,7 +4,15 @@ from os import getenv
 from dotenv import load_dotenv
 import logging
 
-load_dotenv('config.env')
+
+load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    encoding='utf-8',
+    format='%(asctime)s - %(levelname)s: %(message)s',
+)
+
 
 def acessa_betfair(b):
     """

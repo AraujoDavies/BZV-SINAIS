@@ -7,7 +7,7 @@ import json, logging
 from dotenv import load_dotenv
 from os import getenv
 
-load_dotenv('config.env')
+load_dotenv()
 
 def session_token():
   payload = f"username={getenv('USER_BETFAIR')}&password={getenv('PASS_BETFAIR')}"

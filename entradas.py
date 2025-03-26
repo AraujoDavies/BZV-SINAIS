@@ -2,15 +2,15 @@ import logging
 from sqlalchemy import text
 
 from time import sleep
-from helper_browser import meu_browser
-from helper_sql import db_mysql
-from step1 import acessa_betfair
 from dotenv import load_dotenv
-from helper_telegram import enviar_no_telegram
-from sync_db import gsheet_sync
 import pandas as pd
 from datetime import datetime
 
+from helper_browser import meu_browser
+from helper_sql import db_mysql
+from step1 import acessa_betfair
+from helper_telegram import enviar_no_telegram
+from sync_db import gsheet_sync
 
 SQL_CONSULTA_SINAL = """
 SELECT market_id, mercadoSelecionado FROM sinais WHERE entradaProposta = 'N' AND resultado IS NULL AND campeonato IN (SELECT campeonato FROM (SELECT 
@@ -31,15 +31,14 @@ HAVING
 
 CHAT_ID = '-1002294019228'
 
-log_name = './logs/entradas'
-log_name += datetime.now().strftime('%d%m')
-log_name += '.log'
+# log_name = './logs/entradas'
+# log_name += datetime.now().strftime('%d%m')
+# log_name += '.log'
 
-load_dotenv('config.env')
+load_dotenv()
 
 logging.basicConfig(
-    filename=log_name,
-    level=logging.WARNING,
+    level=logging.INFO,
     encoding='utf-8',
     format='%(asctime)s - %(levelname)s: %(message)s',
 )
@@ -362,7 +361,7 @@ def atualizando_gsheet():
     logging.warning('status sync: %s', status_sync)
 
 
-sleep(30)
+# sleep(30)
 engine = db_mysql()
 logging.warning('DB ON...')
 # market_id = '1.236092576'
@@ -388,12 +387,16 @@ while True:
 
         if bool(market):
             logging.warning('Encontrou entrada...')
-            b = meu_browser()
+            b = meu_browser(enable_video=True)
             
             timeout = 0
             logou = acessa_betfair(b)
-            while logou == False:
+            banca_now = meu_saldo(b)
+            logging.info('saldo: %s', banca_now)
+            while type(banca_now) != float:
                 logou = acessa_betfair(b)
+                banca_now = meu_saldo(b)
+                logging.info('saldo: %s', banca_now)
                 timeout += 1
                 if timeout > 3:
                     logging.critical('Várias tentativas de login falharam')
